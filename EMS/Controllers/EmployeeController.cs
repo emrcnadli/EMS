@@ -3,6 +3,7 @@ using EMS.Models;
 using EMS.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
 
 namespace EMS.Controllers
 {
@@ -46,7 +47,50 @@ namespace EMS.Controllers
             await dbContext.Employee.AddAsync(employee);
             await dbContext.SaveChangesAsync();
 
-            return View();
+            return RedirectToAction("List", "Employee");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var employee = await dbContext.Employee.FindAsync(id);
+            return View(employee);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(Employee viewModel)
+        {
+            var employee = await dbContext.Employee.FindAsync(viewModel.Id);
+
+            if (employee is not null)
+            {
+                employee.FirstName = viewModel.FirstName;
+                employee.LastName = viewModel.LastName;
+                employee.BirthDay = viewModel.BirthDay;
+                employee.Email = viewModel.Email;
+                employee.Phone = viewModel.Phone;
+                employee.Departments = viewModel.Departments;
+
+                await dbContext.SaveChangesAsync();
+
+            }
+
+            return RedirectToAction("List", "Employee");
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> Delete(Employee viewModel)
+        {
+            var employee = await dbContext.Employee
+                .AsNoTracking().FirstOrDefaultAsync(x => x.Id == viewModel.Id);
+
+            if (employee is not null)
+            {
+                dbContext.Employee.Remove(viewModel);
+                await dbContext.SaveChangesAsync();
+            }
+
+            return RedirectToAction("List", "Employee");
         }
     }
 }
