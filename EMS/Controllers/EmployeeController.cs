@@ -3,6 +3,7 @@ using EMS.Models;
 using EMS.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using System.Numerics;
 
 namespace EMS.Controllers
@@ -34,20 +35,32 @@ namespace EMS.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(AddPersonalViewModel viewModel)
         {
-            var employee = new Employee
+            
+            try
             {
-                FirstName = viewModel.FirstName,
-                LastName = viewModel.LastName,
-                BirthDay = viewModel.BirthDay,
-                Email = viewModel.Email,
-                Phone = viewModel.Phone,
-                Departments = viewModel.Department,
-            };
+                var employee = new Employee
+                {
+                    FirstName = viewModel.FirstName,
+                    LastName = viewModel.LastName,
+                    BirthDay = viewModel.BirthDay,
+                    Email = viewModel.Email,
+                    Phone = viewModel.Phone,
+                    Departments = viewModel.Department,
+                };
 
-            await dbContext.Employee.AddAsync(employee);
-            await dbContext.SaveChangesAsync();
+                await dbContext.Employee.AddAsync(employee);
+                await dbContext.SaveChangesAsync();
 
-            return RedirectToAction("List", "Employee");
+                return RedirectToAction("List", "Employee");
+            }
+            catch
+            {
+                //ModelState.AddModelError(nameof(NoNullAllowedException.Data), "Please fill areas");
+                return RedirectToAction("Add", "Employee");
+            }
+                
+            
+            
         }
 
         [HttpGet]
